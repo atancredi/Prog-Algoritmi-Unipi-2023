@@ -1,13 +1,13 @@
-from utils import logger
+import logger
 
-def timed(f):
-    def wrapper(*args, **kwargs):
+def timed(f, _no_start=False):
+    def wrapper(*args,**kwargs):
         t =logger.Timelog()
-        _logger = kwargs.get("_logger")
-        if _logger:
-            _logger.debug("start")
+        _logger = kwargs["_logger"]
+        if _logger and not _no_start:
+            _logger.debug(f"start {f.__name__}")
         with t:
-            ret = f(*args, **kwargs)
+            ret = f(*args,**kwargs)
         if _logger:
             _logger.info("stop: {_time:.3f}".format(_time=t.time))
         return ret
