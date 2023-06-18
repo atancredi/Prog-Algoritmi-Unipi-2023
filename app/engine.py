@@ -1,8 +1,5 @@
-from shutil import copyfile
-from os.path import abspath
 from json import dump
 
-from sorting import bubble_sort
 from tqdm import tqdm
 
 from networkx import Graph
@@ -88,10 +85,19 @@ def dump_to_json(data):
     transactions, inputs, outputs = data[0],data[1],data[2]
 
     graph = {}
-    tq = tqdm(transactions)
     _cicli_out = 0
     
+    # start_id = 104393
+    # a = 0
+    # for tr in transactions:
+    #     if tr[0] != start_id:
+    #         a +=1
+    #     else: break
+
+    tq = tqdm(transactions)
+
     try:
+        c = 0
         for tr in tq:
             tq.set_description(f"node {tr[0]}")
             _connections = []
@@ -108,7 +114,7 @@ def dump_to_json(data):
                         if _out[0] == _in[1] and _out[1] == _in[2]:
                             _connections.append((_in[1],_out[2]))
                             break # solo una ce ne sta
-                    
+                        print(_)
                         _ += 1
                     if _in[0] != inputs[__+1][0]:
                         break
@@ -123,7 +129,7 @@ def dump_to_json(data):
     except KeyboardInterrupt:
         pass
     
-    dump(graph, open("graph.json", "w"))
+    dump(graph, open("graph.json", "a"))
 
 
 def execute(data):
