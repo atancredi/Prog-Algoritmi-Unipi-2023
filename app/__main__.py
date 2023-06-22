@@ -1,17 +1,19 @@
 import sys
 import engine as d
+import read as rr
 from importlib import reload
 
 data = None
 if __name__ == "__main__":
     while True:
         if not data:
-            data = d.load_data()
+            data = rr.read_json_graph()
         try:
-            d.execute(data)
+            rr.execute(data)
         except Exception as ex:
             print(ex)
             
         print("Press enter to re-run the script, CTRL-C to exit")
         sys.stdin.readline()
-        reload(d)
+        reload(rr)
+        # reload(d)

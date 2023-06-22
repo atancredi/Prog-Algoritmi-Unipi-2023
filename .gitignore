@@ -1,8 +1,7 @@
 raw_data
 data.yaml
 __pycache__
-graph.json
-graph_bak.json
+graph*.json
 .python-version
 img
 .vscode

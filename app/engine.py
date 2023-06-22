@@ -1,12 +1,5 @@
 from json import dump
-
 from tqdm import tqdm
-
-from networkx import Graph
-
-def read(file, start=0):
-    for l in enumerate(file, start=start):
-        yield l
 
 def load_data():
 
@@ -26,111 +19,69 @@ def load_data():
     # create a backup, load data, put to list with index and txId
     path="raw_data/inputs.csv"
     print("Loading inputs")
-    inputs = []
+    in_map = {}
     with open(path, "r") as f:
         f.readline()
         for l in f.readlines():
             d = l.split(",")
+            if int(d[0]) in in_map.keys():  
+                in_map[int(d[0])].append((int(d[1]),int(d[2])))
+            else: in_map[int(d[0])] = [(int(d[1]),int(d[2]))]
             # txId, prevTxId, prevTxPos
-            inputs.append((int(d[0]),int(d[1]),int(d[2])))
-    print(f"Loaded {len(inputs)} inputs")
+    print(f"Loaded {len(in_map.keys())} inputs")
 
     # create a backup, load data, put to list with index and txId
+    out_map = {}
     path="raw_data/outputs.csv"
     print("Loading outputs")
-    outputs = []
     with open(path, "r") as f:
         f.readline()
+        _ = 0
         for l in f.readlines():
             d = l.split(",")
             # txId, txPos, amount
-            outputs.append((int(d[0]),int(d[1]),int(d[3])))
-    print(f"Loaded {len(outputs)} outputs")
+            out_map[f"{d[0]},{d[1]}"] = int(d[3])
+    print(f"Loaded {len(out_map.keys())} outputs")
 
-    return (transactions, inputs, outputs)
+    return (transactions, in_map, out_map)
 
-def load_graph(data) -> Graph:
-    transactions, inputs, outputs = data[0],data[1],data[2]
-
-    graph = Graph()
-    tq = tqdm(transactions)
-    
-    for tr in tq:
-        tq.set_description(f"node {tr[0]}")
-        graph.add_node(tr[0])
-
-        # cerco gli archi entranti nel nodo con txId = tr
-        __ = 0
-        for _in in inputs:
-
-            if _in[0] == tr[0]:
-                # cerco l'amount dell'arco entrante negli outputs sfruttando prevTxId e prevTxPos
-                _  = 0
-                for _out in outputs:
-                    _cicli_out += 1
-                    if _out[0] == _in[1] and _out[1] == _in[2]:
-                        graph.add_edge(_tr[0],_in[1],amount=_out[2])
-                        break # solo una ce ne sta
-                
-                    _ += 1
-                if _in[0] != inputs[__+1][0]:
-                    break
-            elif _in[0] > tr[0]:
-                break
-            __ += 1
-                
-    return graph
+def find_connections(ins, out_map:dict):
+    _connections = []
+    try:
+        for _in in ins:
+            # cerco l'amount dell'arco entrante negli outputs sfruttando prevTxId e prevTxPos
+            if f"{_in[0]},{_in[1]}" in out_map.keys():
+                _connections.append((_in[0],out_map[f"{_in[0]},{_in[1]}"]))
+    except Exception:
+        print("pd2")
+   
+    return _connections
     
 def dump_to_json(data):
-    transactions, inputs, outputs = data[0],data[1],data[2]
+    transactions, in_map, out_map = data[0],data[1],data[2]
 
     graph = {}
-    _cicli_out = 0
-    
-    # start_id = 104393
-    # a = 0
-    # for tr in transactions:
-    #     if tr[0] != start_id:
-    #         a +=1
-    #     else: break
 
     tq = tqdm(transactions)
 
     try:
-        c = 0
+        __ = 0
         for tr in tq:
             tq.set_description(f"node {tr[0]}")
-            _connections = []
-
+            
             # cerco gli archi entranti nel nodo con txId = tr
-            __ = 0
-            for _in in inputs:
-
-                if _in[0] == tr[0]:
-                    # cerco l'amount dell'arco entrante negli outputs sfruttando prevTxId e prevTxPos
-                    _  = 0
-                    for _out in outputs:
-                        _cicli_out += 1
-                        if _out[0] == _in[1] and _out[1] == _in[2]:
-                            _connections.append((_in[1],_out[2]))
-                            break # solo una ce ne sta
-                        print(_)
-                        _ += 1
-                    if _in[0] != inputs[__+1][0]:
-                        break
-                elif _in[0] > tr[0]:
-                    break
-                __ += 1
+            _connections = []
+            
+            if tr[0] in in_map.keys():
+                _connections = find_connections(in_map[tr[0]],out_map)
                     
-            tq.set_postfix({"cicli_out":_cicli_out})
             if len(_connections) > 0:
                 graph[tr[0]] = _connections
                         
     except KeyboardInterrupt:
         pass
     
-    dump(graph, open("graph.json", "a"))
-
+    dump(graph, open("graph.json", "w"))
 
 def execute(data):
     dump_to_json(data)
