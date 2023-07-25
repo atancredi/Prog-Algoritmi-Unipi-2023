@@ -1,19 +1,23 @@
 import sys
-import engine as d
-import read as rr
+from engines import component as d
 from importlib import reload
+from traceback import print_exc
 
 data = None
 if __name__ == "__main__":
     while True:
         if not data:
-            data = rr.read_json_graph()
+            data = d.load()
         try:
-            rr.execute(data)
+           d.analyze(data)
+        except KeyboardInterrupt:
+            print("Interrupted")
         except Exception as ex:
             print(ex)
+            print_exc()
+            print("aaex")
             
         print("Press enter to re-run the script, CTRL-C to exit")
         sys.stdin.readline()
-        reload(rr)
+        reload(d)
         # reload(d)

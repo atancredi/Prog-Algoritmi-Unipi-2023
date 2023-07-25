@@ -5,3 +5,5 @@ graph*.json
 .python-version
 img
 .vscode
+results/
+reduced_data/
