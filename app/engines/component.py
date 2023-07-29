@@ -89,8 +89,10 @@ def analyze(graph):
         for neighbor, weight in tqdm(graph[node]):
             if neighbor not in visited:
                 if dfs(neighbor, visited, rec_stack, graph):
+                    print(rec_stack)
                     return True
             elif neighbor in rec_stack:
+                print(rec_stack)
                 return True
 
         rec_stack.remove(node)
@@ -119,6 +121,7 @@ def analyze(graph):
                 undirected_graph[neighbor] = set()
 
             undirected_graph[neighbor].add(node)
+    
     json.dump(undirected_graph, open("results/max_component_undirected.json", "w"))
 
     print("is cyclic now?")
